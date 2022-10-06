@@ -12,9 +12,6 @@ public class UserService {
         RestTemplate restTemplate = new RestTemplate();
         String url = String.format("http://localhost:8080/api/v1/users/getByEmail/%s", email);
         ResponseEntity<User> response = restTemplate.getForEntity(url, User.class);
-        if(response.getStatusCodeValue() != 200){
-            return null;
-        }
-        else return response.getBody();
+        return response.getBody();
     }
 }

@@ -1,6 +1,5 @@
 package com.example.moviebot.service;
 
-import com.example.moviebot.model.User;
 import com.example.moviebot.util.CurrentMessage;
 import com.example.moviebot.util.UserDataService;
 import com.example.moviebot.util.UserState;
@@ -14,14 +13,19 @@ public class BotService {
     private final MovieService movieService;
     private final GeneralService generalService;
     private final UserDataService userDataService;
-    final
-    AuthProcess authProcess;
+    private final AuthProcess authProcess;
+    private final RateService rateService;
+    private final LibraryService libraryService;
+    private final CommentService commentService;
 
-    public BotService(MovieService movieService, GeneralService generalService, UserDataService userDataService, AuthProcess authProcess) {
+    public BotService(MovieService movieService, GeneralService generalService, UserDataService userDataService, AuthProcess authProcess, RateService rateService, LibraryService libraryService, CommentService commentService) {
         this.movieService = movieService;
         this.generalService = generalService;
         this.userDataService = userDataService;
         this.authProcess = authProcess;
+        this.rateService = rateService;
+        this.libraryService = libraryService;
+        this.commentService = commentService;
     }
 
     public CurrentMessage handle(Update update) {
@@ -53,6 +57,12 @@ public class BotService {
             if(state.equals(UserState.INPUT_PASSWORD)){
                return authProcess.inputPassword(message);
             }
+            if(state.equals(UserState.INPUT_RATE)){
+                return rateService.setRate(message);
+            }
+            if(state.equals((UserState.INPUT_COMMENT))){
+                return commentService.setComment(message);
+            }
         }
         if(message.hasText()){
             String inputMessage = message.getText();
@@ -67,11 +77,13 @@ public class BotService {
                     currentMessage = movieService.getAllMovies(chatId);
                     break;
                 case "/history":
-//                 todo:   currentMessage = historyService.getHistory(chatId);
+                 currentMessage = libraryService.getHistory(chatId);
                     break;
                 case "/comment":
+                    currentMessage = commentService.getByUser(chatId);
                     break;
                 case "/rate":
+                    currentMessage = rateService.getByUser(chatId);
                     break;
             }
         }
@@ -90,7 +102,6 @@ public class BotService {
                 currentMessage = movieService.next(callbackQuery);
                 break;
         }
-        User userInfo = userDataService.getUserInfo(chatId);
         if(data.startsWith("sign-up/")){
             return authProcess.signUpProcess(chatId);
         }
@@ -101,23 +112,15 @@ public class BotService {
             Integer movieId = Integer.valueOf(data.split("/")[1]);
             return movieService.getMovieById(movieId, chatId);
         }
-        if(data.startsWith("like/")){
-            if(userInfo == null){
-               return authProcess.signUpProcess(chatId);
-            } else if (!userInfo.getStatus()) {
-               return authProcess.loginProcess(chatId);
-            }
-
+        if(data.startsWith("rate/")){
+            Integer movieId = Integer.valueOf(data.split("/")[2]);
+            return rateService.rateProcess(chatId, movieId);
         }
         if(data.startsWith("comment/")){
-            if(userInfo == null){
-                return authProcess.signUpProcess(chatId);
-            } else if (!userInfo.getStatus()) {
-                return authProcess.loginProcess(chatId);
-            }
+            Integer movieId = Integer.valueOf(data.split("/")[2]);
+            return commentService.commentProcess(chatId, movieId);
         }
         return currentMessage;
     }
-
 
 }

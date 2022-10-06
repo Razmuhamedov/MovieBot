@@ -7,5 +7,8 @@ public enum UserState {
     LOGIN_PROCESS,
     SIGN_UP_PROCESS,
     INPUT_NAME,
-    INPUT_AGE
+    INPUT_AGE,
+    INPUT_RATE,
+    INPUT_COMMENT,
+    GET_LIBRARY
 }

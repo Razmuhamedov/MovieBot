@@ -1,5 +1,6 @@
 package com.example.moviebot.service;
 
+import com.example.moviebot.model.SignUp;
 import com.example.moviebot.model.User;
 import com.example.moviebot.util.CurrentMessage;
 import com.example.moviebot.util.MessageType;
@@ -87,8 +88,7 @@ public class AuthProcess {
         }else {
             user = authService.login(user);
             userDataService.insertUserInfo(user, chatId);
-            sendMessage.setText(String.format("Name: %s\nEmail: %s\n Token: %s\n Password: %s\n",
-                    user.getName(),user.getEmail(),user.getToken(), user.getPassword()));
+            sendMessage.setText("You can watch movies!");
         }
         sendMessage.setChatId(chatId);
         userDataService.updateUserState(chatId, UserState.INPUT_DATA);

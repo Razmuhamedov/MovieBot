@@ -1,9 +1,13 @@
 package com.example.moviebot.service;
 
+import com.example.moviebot.util.HeaderUtil;
 import com.example.moviebot.model.Movie;
-import com.example.moviebot.model.MovieListResponse;
+import com.example.moviebot.response.MovieListResponse;
 import com.example.moviebot.util.CurrentMessage;
 import com.example.moviebot.util.MessageType;
+import com.example.moviebot.util.UserDataService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,15 +24,22 @@ import java.util.List;
 public class MovieService {
     private static long page = 0L;
     private static final Integer size = 6;
+
+    private final UserDataService userDataService;
     long moviesCount;
+
+    public MovieService(UserDataService userDataService) {
+        this.userDataService = userDataService;
+    }
 
     public CurrentMessage getAllMovies(Long chatId) {
         CurrentMessage currentMessage = new CurrentMessage();
         SendMessage sendMessage = new SendMessage();
         RestTemplate restTemplate = new RestTemplate();
-
+        String token = userDataService.getUserInfo(chatId).getToken();
+        HttpEntity<Void> request = new HttpEntity<>(HeaderUtil.headers(token));
         String url = String.format("http://localhost:8080/api/v1/movies/getAllMovies?page=%s&size=%s", page, size);
-        ResponseEntity<MovieListResponse> response = restTemplate.getForEntity(url, MovieListResponse.class);
+        ResponseEntity<MovieListResponse> response = restTemplate.exchange(url, HttpMethod.GET, request, MovieListResponse.class);
         if(response.getStatusCode().value() == 200){
             sendMessage.setText("All movies");
             sendMessage.setChatId(chatId);
@@ -96,7 +107,6 @@ public class MovieService {
         rowList.add(row);
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
-
     }
 
 
@@ -111,10 +121,7 @@ public class MovieService {
     }
 
     public CurrentMessage getMovieById(Integer movieId, Long chatId) {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:8080/api/v1/movies/" + movieId;
-        ResponseEntity<Movie> response = restTemplate.getForEntity(url, Movie.class);
-        Movie movie = response.getBody();
+        Movie movie = getMovie(movieId, chatId);
         CurrentMessage currentMessage = new CurrentMessage();
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyMarkup(getMarkUpForMovie(movieId, chatId));
@@ -126,13 +133,22 @@ public class MovieService {
         return currentMessage;
     }
 
+    public Movie getMovie(Integer movieId, Long chatId){
+        RestTemplate restTemplate = new RestTemplate();
+        String token = userDataService.getUserInfo(chatId).getToken();
+        HttpEntity<Void> request = new HttpEntity<>(HeaderUtil.headers(token));
+        String url = "http://localhost:8080/api/v1/movies/" + movieId;
+        ResponseEntity<Movie> response = restTemplate.exchange(url, HttpMethod.GET, request, Movie.class);
+        return response.getBody();
+    }
+
     private ReplyKeyboard getMarkUpForMovie(Integer movieId, Long chatId) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
         List<InlineKeyboardButton> row = new ArrayList<>();
         InlineKeyboardButton like = new InlineKeyboardButton();
-        like.setText("Like");
-        like.setCallbackData(String.format("like/%s/%s", chatId, movieId));
+        like.setText("Rate");
+        like.setCallbackData(String.format("rate/%s/%s", chatId, movieId));
         InlineKeyboardButton comment = new InlineKeyboardButton();
         comment.setText("Comment");
         comment.setCallbackData(String.format("comment/%s/%s", chatId, movieId));
@@ -141,6 +157,5 @@ public class MovieService {
         rowList.add(row);
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
-
     }
 }

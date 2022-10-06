@@ -1,5 +1,6 @@
-package com.example.moviebot.model;
+package com.example.moviebot.response;
 
+import com.example.moviebot.model.Movie;
 import lombok.Getter;
 import lombok.Setter;
 

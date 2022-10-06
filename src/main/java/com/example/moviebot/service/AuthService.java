@@ -1,7 +1,7 @@
 package com.example.moviebot.service;
 
 import com.example.moviebot.model.Login;
-import com.example.moviebot.model.LoginResult;
+import com.example.moviebot.response.LoginResult;
 import com.example.moviebot.model.SignUp;
 import com.example.moviebot.model.User;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthService {
 
     public String signUp(User user) {
         RestTemplate restTemplate = new RestTemplate();
-        String url = "http://localhost:api/v1/auth/sign-up/";
+        String url = "http://localhost:8080/api/v1/auth/sign-up/";
         SignUp signUp = new SignUp();
         signUp.setName(user.getName());
         signUp.setAge(user.getAge());
