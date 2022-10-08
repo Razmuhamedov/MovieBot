@@ -120,6 +120,10 @@ public class BotService {
             Integer movieId = Integer.valueOf(data.split("/")[2]);
             return commentService.commentProcess(chatId, movieId);
         }
+        if(data.startsWith("watchMovie/")){
+            Integer movieId = Integer.valueOf(data.split("/")[2]);
+            return libraryService.watchMovie(chatId, movieId);
+        }
         return currentMessage;
     }
 

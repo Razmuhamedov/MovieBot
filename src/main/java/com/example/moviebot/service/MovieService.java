@@ -145,16 +145,22 @@ public class MovieService {
     private ReplyKeyboard getMarkUpForMovie(Integer movieId, Long chatId) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
-        List<InlineKeyboardButton> row = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        InlineKeyboardButton watch = new InlineKeyboardButton();
+        watch.setText("Watch movie");
+        watch.setCallbackData(String.format("watchMovie/%d/%d", chatId, movieId));
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(watch);
+        rowList.add(row1);
         InlineKeyboardButton like = new InlineKeyboardButton();
         like.setText("Rate");
         like.setCallbackData(String.format("rate/%s/%s", chatId, movieId));
         InlineKeyboardButton comment = new InlineKeyboardButton();
         comment.setText("Comment");
         comment.setCallbackData(String.format("comment/%s/%s", chatId, movieId));
-        row.add(like);
-        row.add(comment);
-        rowList.add(row);
+        row2.add(like);
+        row2.add(comment);
+        rowList.add(row2);
         inlineKeyboardMarkup.setKeyboard(rowList);
         return inlineKeyboardMarkup;
     }
